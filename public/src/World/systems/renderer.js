@@ -1,8 +1,9 @@
-import { WebGLRenderer } from '../../../vendor/three/build/three.module.js';
+import * as THREE from "three";
 
 function createRenderer() {
-  const renderer = new WebGLRenderer({antialias: false});
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  const renderer = new THREE.WebGLRenderer();
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.setSize( window.innerWidth, window.innerHeight );
   return renderer;
 }
 
