@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.146/examples/jsm/loaders/ColladaLoader.js";
-import { createRenderer } from "./systems/renderer";
-import { createScene } from "./components/scene";
-import { createCamera } from "./components/camera";
+import { createRenderer } from "./systems/renderer.js";
+import { createScene } from "./components/scene.js";
+import { createCamera } from "./components/camera.js";
 
 let container;
 let camera, scene;
