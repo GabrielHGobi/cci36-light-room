@@ -1,36 +1,78 @@
-import { createCamera } from './components/camera.js';
-import { createScene } from './components/scene.js';
-import { createRenderer } from './systems/renderer.js';
-import { Resizer } from './systems/Resizer.js';
-import { Loop } from './systems/Loop.js';
+import * as THREE from "three";
+import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.146/examples/jsm/loaders/ColladaLoader.js";
+import { createRenderer } from "./systems/renderer";
+import { createScene } from "./components/scene";
+import { createCamera } from "./components/camera";
 
-// These variables are module-scoped: we cannot access them
-// from outside the module
-let camera;
-let renderer;
-let scene;
-let loop;
+let container;
+let camera, scene;
+let elf, renderer, clock;
 
-class World {
-    // instance of the world
-    constructor(container) {
-        renderer = createRenderer();
-        camera = createCamera();
-        scene = createScene();
-        loop = new Loop(camera, scene, renderer);
-        container.append(renderer.domElement);
-        const resizer = new Resizer(container, camera, renderer);
-    }
+function init() {
     
-    render() {
-        // draw a single frame
-        renderer.render(scene, camera);
+
+    container = document.getElementById( 'scene-container' );
+
+    camera = createCamera();
+    scene = createScene();
+    renderer = createRenderer();
+    clock = new THREE.Clock();
+
+
+    // loading manager
+    const loadingManager = new THREE.LoadingManager( function () {
+        scene.add( elf );
+    } );
+
+    // collada
+    const loader = new ColladaLoader( loadingManager );
+    loader.load( './models/scene_mod.dae', function ( collada ) {
+        elf = collada.scene;
+    } );
+
+    // light
+    const ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
+    scene.add( ambientLight );
+    const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
+    directionalLight.position.set( 1, 1, 0 ).normalize();
+    scene.add( directionalLight );
+
+    container.append(renderer.domElement);
+
+    window.addEventListener( 'resize', onWindowResize );
+    
+}
+
+function onWindowResize() {
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize( window.innerWidth, window.innerHeight );
+
+}
+
+function animate() {
+
+    requestAnimationFrame( animate );
+
+    render();
+
+}
+
+function render() {
+
+    const delta = clock.getDelta();
+
+    if ( elf !== undefined ) {
+
+        elf.rotation.z += delta * 0.5;
+
     }
 
-    start() {
-        loop.start();
-    }
-    
-  }
-  
-  export { World };
+    renderer.render( scene, camera );
+
+}
+
+ 
+export { init, animate };
