@@ -1,78 +1,72 @@
 import * as THREE from "three";
 import { ColladaLoader } from "https://cdn.jsdelivr.net/npm/three@0.146/examples/jsm/loaders/ColladaLoader.js";
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.146/examples/jsm/controls/OrbitControls.js';
 import { createRenderer } from "./systems/renderer.js";
 import { createScene } from "./components/scene.js";
 import { createCamera } from "./components/camera.js";
 
-let container;
-let camera, scene;
-let elf, renderer, clock;
+
+let container, rect, camera, scene, orbit_controls, dae, renderer;
+const mouse = new THREE.Vector2(), raycaster = new THREE.Raycaster();
 
 function init() {
     
-
     container = document.getElementById( 'scene-container' );
-
+    rect = container.getBoundingClientRect();
     camera = createCamera();
     scene = createScene();
     renderer = createRenderer();
-    clock = new THREE.Clock();
 
-
-    // loading manager
-    const loadingManager = new THREE.LoadingManager( function () {
-        scene.add( elf );
-    } );
-
-    // collada
+    const loadingManager = new THREE.LoadingManager(() => {
+        scene.add(dae);
+    });
     const loader = new ColladaLoader( loadingManager );
-    loader.load( './models/scene_mod.dae', function ( collada ) {
-        elf = collada.scene;
-    } );
+    loader.load( './models/scene.dae', (collada) => {
+        collada.scene.traverse( function(child) {
+            if (child instanceof THREE.Mesh) 
+                child.material = new THREE.MeshBasicMaterial({vertexColors: true });
+        });
+        dae = collada.scene;
+    });
 
-    // light
-    const ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
-    scene.add( ambientLight );
-    const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.8 );
-    directionalLight.position.set( 1, 1, 0 ).normalize();
-    scene.add( directionalLight );
+    orbit_controls = new OrbitControls( camera, renderer.domElement );
+    orbit_controls.addEventListener( 'change', render );
+    orbit_controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    orbit_controls.dampingFactor = 0.08;
+    orbit_controls.screenSpacePanning = false;
+    orbit_controls.minDistance = 10;
+    orbit_controls.maxDistance = 50;
+    orbit_controls.maxPolarAngle = Math.PI / 2;
 
     container.append(renderer.domElement);
 
     window.addEventListener( 'resize', onWindowResize );
+    window.addEventListener( 'click', onClick );
     
 }
 
 function onWindowResize() {
-
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-
     renderer.setSize( window.innerWidth, window.innerHeight );
-
 }
 
-function animate() {
+function onClick(event) {
 
-    requestAnimationFrame( animate );
-
-    render();
-
+    event.preventDefault();
+    mouse.x = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    mouse.y = - ((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+    raycaster.setFromCamera( mouse, camera );
+    const intersections = raycaster.intersectObjects( scene.children, true );
+    if ( intersections.length > 0 ) {
+        const object = intersections[ 0 ].object;
+        console.log(object.name)
+    }
 }
 
 function render() {
-
-    const delta = clock.getDelta();
-
-    if ( elf !== undefined ) {
-
-        elf.rotation.z += delta * 0.5;
-
-    }
-
     renderer.render( scene, camera );
-
 }
 
  
-export { init, animate };
+export { init, render };
