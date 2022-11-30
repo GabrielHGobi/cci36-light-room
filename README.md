@@ -221,3 +221,5 @@ Por fim, clicando-se novamente na lâmpada, obtém-se:
 <img src=".//images/redbook_newgamma.png"  style="display: block; margin: 0 auto; width:300px;"/>
 
 Observa-se que a lâmpada "apagou" (deixou de possuir emissão natural).
+
+Além disso, observa-se os efeitos de luminosidade para as configurações condizentes com o esperado no que tange ao arcabouço teórico desenvolvido no trabalho anterior sobre radiosidade (observa-se, por exemplo, que o livro vermelho não ilumina os demais livros conforme esperado pela ortogonalidade do espectro de emissão).
