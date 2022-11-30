@@ -5,10 +5,12 @@ import { createRenderer } from "./systems/renderer.js";
 import { createScene } from "./components/scene.js";
 import { createCamera } from "./components/camera.js";
 
-
+const gui = new dat.GUI();
 let container, rect, camera, scene, orbit_controls, dae, renderer;
 const mouse = new THREE.Vector2(), raycaster = new THREE.Raycaster();
+let lastGama = 0.8;
 let postData = {lumObjs: [], gama: 0.8};
+gui.add(postData, "gama",  0, 1, 0.01).name("Gama factor");
 let changed = false;
 let blob, url;
 let loader;
@@ -46,6 +48,8 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize );
     window.addEventListener( 'click', onClick );
+
+    
     
 }
 
@@ -73,6 +77,10 @@ function onClick(event) {
             postData.lumObjs.push(object.name);
         changed = true;
     }
+    if (postData.gama != lastGama) {
+        lastGama = postData.gama;
+        changed = true;
+    }
 }
 
 
@@ -85,7 +93,7 @@ function render() {
     }
 }
 
-function saveColladaDataToFile(text) {
+function saveColladaData(text) {
     
     blob = new Blob([text],
         { type: "text/plain;charset=utf-8" });
@@ -102,7 +110,7 @@ function saveColladaDataToFile(text) {
 function updateModel(postData){
     axios.post('https://radiosity-server-iwcwk3spfq-rj.a.run.app', postData)
     .then(function (response) {
-        saveColladaDataToFile(response.data)
+        saveColladaData(response.data)
     })
     .catch(function (error) {
         console.log(error);
