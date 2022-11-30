@@ -18,11 +18,7 @@ class RadiositySystem:
             file_A = open( "./utils/numpy_files/A.npy", 'rb')
             self.A = np.load(file_A)
         
-        if not os.path.exists("./utils/numpy_files/E.npy"):
-            self.E = self._calculate_E()
-        else:
-            file_E = open("./utils/numpy_files/E.npy", 'rb')
-            self.E = np.load(file_E)
+        self.E = self._calculate_E()
         
         self.B = np.empty((self._n, self._NUM_COLORS))
 
@@ -52,10 +48,8 @@ class RadiositySystem:
         for idx_t, t in enumerate(self._t):
             for _, lum_t in enumerate(self._luminous_faces):
                 if t == lum_t:
-                    E[idx_t, :] = np.ones((1, self._NUM_COLORS))
+                    E[idx_t, :] = lum_t.color
                     break   
-        file_E = open("./utils/numpy_files/E.npy", 'wb') 
-        np.save(file_E, E)
         return E
 
     def _is_object_between(self, i, j):
@@ -119,8 +113,6 @@ class RadiositySystem:
         """
         for c in range(self._NUM_COLORS):
             self.B[:, c] = np.linalg.solve(self.A[:, :, c], self.E[:, c])
-        file_B = open("./utils/numpy_files/B.npy", 'wb') 
-        np.save(file_B, self.B)
 
 
    
